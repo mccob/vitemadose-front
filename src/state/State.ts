@@ -140,7 +140,7 @@ export type Commune = {
 };
 
 export type StatsByDate = {
-    dates: ISODateString,
+    dates: ISODateString[],
     total_centres_disponibles: number[],
     total_centres: number[],
     total_appointments: number[]
