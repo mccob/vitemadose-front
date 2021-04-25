@@ -10,16 +10,14 @@ import {
     libelleUrlPathDeCommune,
     libelleUrlPathDuDepartement,
     PLATEFORMES,
-    State,
+    State, StatsByDate,
     StatsLieu,
-    StatsByDate
 } from "../state/State";
 import {
     AutocompleteTriggered,
     CommuneSelected,
     DepartementSelected
 } from "../components/vmd-commune-selector.component";
-import Chart from "chart.js";
 
 @customElement('vmd-home')
 export class VmdHomeView extends LitElement {
@@ -41,7 +39,7 @@ export class VmdHomeView extends LitElement {
     @property({type: Array, attribute: false}) recuperationCommunesEnCours: boolean = false;
     @property({type: Array, attribute: false}) communesDisponibles: Commune[]|undefined = undefined;
     @property({type: Array, attribute: false}) statsLieu: StatsLieu|undefined = undefined;
-    @property({type: Array, attribute: false}) statsByDate: StatsByDate|undefined = undefined;
+    @property({type: Array, attribute: false}) statsByDates: StatsByDate|undefined = undefined;
 
     private departementsDisponibles: Departement[]|undefined = [];
     private communeSelectionee: Commune|undefined = undefined;
@@ -83,6 +81,21 @@ export class VmdHomeView extends LitElement {
     departementSelected(departement: Departement) {
         this.departementSelectione = departement;
         this.rechercherRdv();
+    }
+
+    async connectedCallback() {
+        super.connectedCallback();
+
+        const [ departementsDisponibles, statsLieu, statsByDates, autocompletes ] = await Promise.all([
+            State.current.departementsDisponibles(),
+            State.current.statsLieux(),
+            State.current.statsByDate(),
+            State.current.communeAutocompleteTriggers(Router.basePath)
+        ])
+        this.departementsDisponibles = departementsDisponibles;
+        this.statsLieu = statsLieu;
+        this.statsByDates = statsByDates;
+        this.communesAutocomplete = new Set(autocompletes);
     }
 
     render() {
@@ -195,7 +208,7 @@ export class VmdHomeView extends LitElement {
 
                 <div class="homeCard">
                     <div class="p-5 text-dark bg-light homeCard-container mt-5">
-                        <canvas id="chartCreneaux" width="400" height="150"></canvas>
+                      <vmd-stats-by-date-graph width="400" height="150" .data="${this.statsByDates}"></vmd-stats-by-date-graph>
                     </div>
                 </div>
             </div>
@@ -251,7 +264,7 @@ export class VmdHomeView extends LitElement {
         ])
         this.departementsDisponibles = departementsDisponibles;
         this.statsLieu = statsLieu;
-        this.statsByDate = statsByDate;
+        this.statsByDates = statsByDate;
         this.refreshGraph();
         this.communesAutocomplete = new Set(autocompletes);
     }
