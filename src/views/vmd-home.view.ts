@@ -12,6 +12,7 @@ import {
     PLATEFORMES,
     State,
     StatsLieu,
+    StatsByDate
 } from "../state/State";
 import {
     AutocompleteTriggered,
@@ -40,6 +41,7 @@ export class VmdHomeView extends LitElement {
     @property({type: Array, attribute: false}) recuperationCommunesEnCours: boolean = false;
     @property({type: Array, attribute: false}) communesDisponibles: Commune[]|undefined = undefined;
     @property({type: Array, attribute: false}) statsLieu: StatsLieu|undefined = undefined;
+    @property({type: Array, attribute: false}) statsByDate: StatsByDate|undefined = undefined;
 
     private departementsDisponibles: Departement[]|undefined = [];
     private communeSelectionee: Commune|undefined = undefined;
@@ -202,46 +204,55 @@ export class VmdHomeView extends LitElement {
         `;
     }
 
-    protected firstUpdated(_changedProperties: PropertyValues) {
-        super.firstUpdated(_changedProperties);
-
-        console.log("log")
-        console.log(this.statsLieu?this.statsLieu.global.creneaux.toLocaleString():"")
-
-        const labels = [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-        ];
+    protected refreshGraph(){
         const data = {
-            labels: labels,
+            labels: this.statsByDate?this.statsByDate.dates:"",
             datasets: [{
-                label: 'My First dataset',
+                label: 'Nombre de créneaux disponibles',
                 backgroundColor: 'rgb(255, 99, 132)',
                 borderColor: 'rgb(255, 99, 132)',
-                data: [0, 10, 5, 2, 20, 30, 45],
+                data: this.statsByDate?this.statsByDate.total_appointments:"",
             }]
         };
         var myChart = new Chart(this.shadowRoot!.querySelector("#chartCreneaux") as HTMLCanvasElement, {
-            type: 'line',
+            type: 'bar',
             data,
-            options: {}
+            options: {
+                scales:{
+                    xAxes: [{
+                        ticks:{
+                            source: 'auto'
+                        },
+                        type: 'time',
+                        distribution: 'linear',
+                        gridLines: {
+                            display: false
+                        }
+                    }]
+                }
+            }
         });
     }
 
+    protected firstUpdated(_changedProperties: PropertyValues) {
+        super.firstUpdated(_changedProperties);
+        //this.refreshGraph();
+    }
+
     async connectedCallback() {
+        
         super.connectedCallback();
 
-        const [ departementsDisponibles, statsLieu, autocompletes ] = await Promise.all([
+        const [ departementsDisponibles, statsLieu, autocompletes, statsByDate ] = await Promise.all([
             State.current.departementsDisponibles(),
             State.current.statsLieux(),
-            State.current.communeAutocompleteTriggers(Router.basePath)
+            State.current.communeAutocompleteTriggers(Router.basePath),
+            State.current.statsByDate()
         ])
         this.departementsDisponibles = departementsDisponibles;
         this.statsLieu = statsLieu;
+        this.statsByDate = statsByDate;
+        this.refreshGraph();
         this.communesAutocomplete = new Set(autocompletes);
     }
 
