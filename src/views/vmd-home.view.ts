@@ -224,36 +224,6 @@ export class VmdHomeView extends LitElement {
         `;
     }
 
-    protected refreshGraph(){
-        const data = {
-            labels: this.statsByDate?this.statsByDate.dates:"",
-            datasets: [{
-                label: 'Nombre de créneaux disponibles',
-                backgroundColor: 'rgb(255, 99, 132)',
-                borderColor: 'rgb(255, 99, 132)',
-                data: this.statsByDate?this.statsByDate.total_appointments:"",
-            }]
-        };
-        var myChart = new Chart(this.shadowRoot!.querySelector("#chartCreneaux") as HTMLCanvasElement, {
-            type: 'bar',
-            data,
-            options: {
-                scales:{
-                    xAxes: [{
-                        ticks:{
-                            source: 'auto'
-                        },
-                        type: 'time',
-                        distribution: 'linear',
-                        gridLines: {
-                            display: false
-                        }
-                    }]
-                }
-            }
-        });
-    }
-
     protected firstUpdated(_changedProperties: PropertyValues) {
         super.firstUpdated(_changedProperties);
     }
@@ -271,7 +241,6 @@ export class VmdHomeView extends LitElement {
         this.departementsDisponibles = departementsDisponibles;
         this.statsLieu = statsLieu;
         this.statsByDates = statsByDate;
-        //this.refreshGraph();
         this.communesAutocomplete = new Set(autocompletes);
     }
 
