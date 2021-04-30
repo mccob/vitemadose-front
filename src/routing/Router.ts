@@ -48,6 +48,8 @@ class Routing {
                  </vmd-rdv-par-commune>`);
         this.declareRoute(`/centres`, 'centres',(params) => (subViewSlot) =>
             html`<vmd-lieux>${subViewSlot}</vmd-lieux>`);
+        this.declareRoute(`/statistiques`, 'statistiques',(params) => (subViewSlot) =>
+            html`<vmd-statistiques>${subViewSlot}</vmd-statistiques>`);
         this.declareRoute(`/apropos`, 'a_propos',(params) => (subViewSlot) =>
             html`<vmd-apropos>${subViewSlot}</vmd-apropos>`);
 

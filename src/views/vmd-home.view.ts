@@ -10,7 +10,7 @@ import {
     libelleUrlPathDeCommune,
     libelleUrlPathDuDepartement,
     PLATEFORMES,
-    State, StatsByDate,
+    State,
     StatsLieu,
 } from "../state/State";
 import {
@@ -39,7 +39,6 @@ export class VmdHomeView extends LitElement {
     @property({type: Array, attribute: false}) recuperationCommunesEnCours: boolean = false;
     @property({type: Array, attribute: false}) communesDisponibles: Commune[]|undefined = undefined;
     @property({type: Array, attribute: false}) statsLieu: StatsLieu|undefined = undefined;
-    @property({type: Array, attribute: false}) statsByDates: StatsByDate|undefined = undefined;
 
     private departementsDisponibles: Departement[]|undefined = [];
     private communeSelectionee: Commune|undefined = undefined;
@@ -86,15 +85,13 @@ export class VmdHomeView extends LitElement {
     async connectedCallback() {
         super.connectedCallback();
 
-        const [ departementsDisponibles, statsLieu, statsByDates, autocompletes ] = await Promise.all([
+        const [ departementsDisponibles, statsLieu, autocompletes ] = await Promise.all([
             State.current.departementsDisponibles(),
             State.current.statsLieux(),
-            State.current.statsByDate(),
             State.current.communeAutocompleteTriggers(Router.basePath)
         ])
         this.departementsDisponibles = departementsDisponibles;
         this.statsLieu = statsLieu;
-        this.statsByDates = statsByDates;
         this.communesAutocomplete = new Set(autocompletes);
     }
 
@@ -187,34 +184,32 @@ export class VmdHomeView extends LitElement {
                 <div class="homeCard">
                     <div class="p-5 text-dark bg-light homeCard-container mt-5">
                         <div class="row gx-5">
+                        
                             <div class="col-24 col-md text-center">
                                 <i class="bi vmdicon-commerical-building fs-6 text-primary"></i>
-                                <div class="h4 mt-4">${this.statsLieu?this.statsLieu.global.disponibles.toLocaleString():""}</div>
-                                <p>Lieux de vaccination ayant des disponibilités</p>
+                                <a href="${Router.basePath}statistiques" >
+                                    <div class="h4 mt-4">${this.statsLieu?this.statsLieu.global.disponibles.toLocaleString():""}</div>
+                                    <p>Lieux de vaccination ayant des disponibilités</p>
+                                </a>
                             </div>
                             <div class="col-24 col-md text-center">
                                 <i class="bi vmdicon-geo-alt-fill fs-6 text-primary"></i>
-                                <div class="h4 mt-4">${this.statsLieu?this.statsLieu.global.total.toLocaleString():""}</div>
-                                <p>Lieux de vaccination supportés</p>
+                                <a href="${Router.basePath}statistiques" >
+                                    <div class="h4 mt-4">${this.statsLieu?this.statsLieu.global.total.toLocaleString():""}</div>
+                                    <p>Lieux de vaccination supportés</p>
+                                </a>
                             </div>
                             <div class="col-24 col-md text-center">
                                 <i class="bi vmdicon-check-circle-fill fs-6 text-primary"></i>
-                                <div class="h4 mt-4">${this.statsLieu?this.statsLieu.global.creneaux.toLocaleString():""}</div>
-                                <p>Créneaux de vaccination disponibles</p>
+                                <a href="${Router.basePath}statistiques" >
+                                    <div class="h4 mt-4">${this.statsLieu?this.statsLieu.global.creneaux.toLocaleString():""}</div>
+                                    <p>Créneaux de vaccination disponibles</p>
+                                </a>
                             </div>
+                            
+                            
+                            
                         </div>
-                    </div>
-                </div>
-
-                <div class="homeCard">
-                    <div class="p-5 text-dark bg-light homeCard-container mt-5">
-                      <vmd-stats-by-date-creneaux-graph width="400" height="150" .data="${this.statsByDates}"></vmd-stats-by-date-creneaux-graph>
-                    </div>
-                </div>
-
-                <div class="homeCard">
-                    <div class="p-5 text-dark bg-light homeCard-container mt-5">
-                      <vmd-stats-by-date-centres-graph width="400" height="150" .data="${this.statsByDates}"></vmd-stats-by-date-creneaux-graph>
                     </div>
                 </div>
 
@@ -232,15 +227,13 @@ export class VmdHomeView extends LitElement {
         
         super.connectedCallback();
 
-        const [ departementsDisponibles, statsLieu, autocompletes, statsByDate ] = await Promise.all([
+        const [ departementsDisponibles, statsLieu, autocompletes ] = await Promise.all([
             State.current.departementsDisponibles(),
             State.current.statsLieux(),
             State.current.communeAutocompleteTriggers(Router.basePath),
-            State.current.statsByDate()
         ])
         this.departementsDisponibles = departementsDisponibles;
         this.statsLieu = statsLieu;
-        this.statsByDates = statsByDate;
         this.communesAutocomplete = new Set(autocompletes);
     }
 
