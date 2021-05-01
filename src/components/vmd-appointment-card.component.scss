@@ -1,0 +1,82 @@
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/mixins/breakpoints";
+@import "../styles/bootstrap-variables";
+
+.rdvPlatformLogo {
+  max-width: 8rem;
+  max-height: 5rem;
+
+  &._doctolib {
+  }
+
+  &._maiia {
+    max-width: 7rem;
+  }
+
+  &._ordoclic {
+    max-width: 8.2rem;
+  }
+
+  &._keldoc {
+  }
+
+  &._pandalab {
+  }
+
+  &._mapharma {
+    max-width: 10rem;
+  }
+}
+
+.card {
+  max-width: 80vw;
+  margin: auto;
+
+  .distance {
+    font-weight: lighter;
+    font-size: 80%;
+  }
+
+  &.clickable {
+    &:hover {
+      background-color: darken($card-bg, 3%);
+    }
+
+    &.bg-disabled {
+      &:hover {
+        background-color: darken($gray-400, 3%);
+      }
+    }
+
+    cursor: pointer;
+  }
+
+  @include media-breakpoint-up(xl) {
+    max-width: 65vw;
+  }
+}
+
+vmd-appointment-metadata [slot='content'] a {
+  &:hover {
+    color: $link-color
+  }
+
+  @include media-breakpoint-down(lg) {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-width: 1px;
+  }
+}
+
+a:hover, a:focus {
+  color: $link-color;
+}
+
+.btn-primary.disabled {
+  background-color: tint-color($primary, 20%);
+}
+
+.btn-tel {
+  background-color: tint-color($primary, 80%);
+  color: $primary;
+}
