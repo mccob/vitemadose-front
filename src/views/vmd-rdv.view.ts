@@ -18,7 +18,7 @@ import {
     TRIS_CENTRE,
     CodeTypeVaccin,
     FILTRE_TYPE_VACCIN,
-    TYPES_VACCIN,
+    TYPES_VACCIN, TypeVaccin
 } from "../state/State";
 import {Dates} from "../utils/Dates";
 import {Strings} from "../utils/Strings";
@@ -58,6 +58,8 @@ export abstract class AbstractVmdRdvView extends LitElement {
     @property({type: Array, attribute: false}) lieuxParDepartementAffiches: LieuxAvecDistanceParDepartement | undefined = undefined;
     @property({type: Boolean, attribute: false}) searchInProgress: boolean = false;
     @property({type: Boolean, attribute: false}) miseAJourDisponible: boolean = false;
+    
+    @property({type: String}) typeVaccin: 'tous' | 'arnm' | 'adenovirus' = 'tous';
 
     protected derniereCommuneSelectionnee: Commune|undefined = undefined;
     protected lieuBackgroundRefreshIntervalId: number|undefined = undefined;
@@ -421,38 +423,25 @@ export abstract class AbstractVmdRdvView extends LitElement {
         }
     }
     
-    protected filterTypeVaccin(vaccine_type: Array, typeVaccin: CodeTypeVaccin) {
+    protected filterTypeVaccin(vaccine_type: String, typeVaccin: CodeTypeVaccin) {
         if(typeVaccin === 'tous') {
             return true;
         } else {
-            let result = false;
-            
-            if(vaccine_type && vaccine_type.length)
-            {
-                if(vaccine_type.indexOf(',')!==-1)
-                {
-                    let arrayVaccinne = vaccine_type.split(',');
-                
-                    arrayVaccinne.forEach(function(item){
-                        if(TYPES_VACCIN[item.trim()]==typeVaccin)
-                        {
-                            result = true;
-                        }
-                    });
-                }else{
-                    if(TYPES_VACCIN[vaccine_type.trim()]==typeVaccin)
-                    {
-                        result = true;
-                    }
-                }
-                return result;
-            }else{
-                // Not hidding vaccine center of vaccine type is unknown
-                result = true;
+            if(!vaccine_type || !vaccine_type.length) {
+                return false;
             }
-
-         return result;
+            return vaccine_type.split(",")
+                .map((typeStr) => TYPES_VACCIN[typeStr.trim() as TypeVaccin])
+                .indexOf(typeVaccin) !== -1;
         }
+    }
+    
+    critereVaccinUpdated(typeVaccin: CodeTypeVaccin) {
+        this.typeVaccin = typeVaccin;
+
+        Analytics.INSTANCE.critereTypeVaccinMisAJour(typeVaccin);
+
+        this.refreshPageWhenValidParams();
     }
 
     abstract libelleLieuSelectionne(): TemplateResult;
@@ -465,7 +454,6 @@ export class VmdRdvParCommuneView extends AbstractVmdRdvView {
     @property({type: String}) codePostalSelectionne: string | undefined = undefined;
 
     @property({type: String}) critèreDeTri: 'date' | 'distance' = 'distance';
-    @property({type: String}) typeVaccin: 'tous' | 'arnm' | 'adenovirus' = 'tous';
 
     preventRafraichissementLieux() {
         return !this.communeSelectionnee;
@@ -590,14 +578,6 @@ export class VmdRdvParCommuneView extends AbstractVmdRdvView {
         this.refreshPageWhenValidParams();
     }
 
-    critereVaccinUpdated(typeVaccin: CodeTypeVaccin) {
-        this.typeVaccin = typeVaccin;
-
-        Analytics.INSTANCE.critereTypeVaccinMisAJour(typeVaccin);
-
-        this.refreshPageWhenValidParams();
-    }
-
     renderAdditionnalSearchCriteria(): TemplateResult {
         return html`
           <div class="rdvForm-fields row align-items-center">
@@ -618,8 +598,6 @@ export class VmdRdvParCommuneView extends AbstractVmdRdvView {
 
 @customElement('vmd-rdv-par-departement')
 export class VmdRdvParDepartementView extends AbstractVmdRdvView {
-
-    @property({type: String}) typeVaccin: 'tous' | 'arnm' | 'adenovirus' = 'tous';
 
     async onceStartupPromiseResolved() {
         if(this.codeDepartementSelectionne) {
@@ -656,13 +634,5 @@ export class VmdRdvParDepartementView extends AbstractVmdRdvView {
                 .sortBy(l => this.extraireFormuleDeTri(l, 'date'))
                 .build()
         };
-    }
-
-    critereVaccinUpdated(typeVaccin: CodeTypeVaccin) {
-        this.typeVaccin = typeVaccin;
-
-        Analytics.INSTANCE.critereTypeVaccinMisAJour(typeVaccin);
-
-        this.refreshPageWhenValidParams();
     }
 }
